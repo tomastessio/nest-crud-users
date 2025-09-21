@@ -12,6 +12,7 @@ import { Type } from 'class-transformer';
 import { CreateProfileDto } from './create-profile.dto';
 
 export class CreateUserDto {
+
   @ApiProperty({ example: 'Tomas Tessio' })
   @IsString()
   @IsNotEmpty()
@@ -31,4 +32,5 @@ export class CreateUserDto {
   @ValidateNested()
   @Type(() => CreateProfileDto)
   perfil: CreateProfileDto;
+  
 }

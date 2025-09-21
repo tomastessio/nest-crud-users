@@ -15,11 +15,13 @@ class BaseWithoutPerfil extends OmitType(CreateUserDto, ['perfil'] as const) {}
 class PartialWithoutPerfil extends PartialType(BaseWithoutPerfil) {}
 
 class PerfilPartial {
+
   @ApiPropertyOptional({ type: UpdateProfileDto })
   @IsOptional()
   @ValidateNested()
   @Type(() => UpdateProfileDto)
   perfil?: UpdateProfileDto;
+  
 }
 
 export class UpdateUserDto extends IntersectionType(

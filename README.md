@@ -1,98 +1,245 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Users API CRUD (NestJS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST con NestJS que implementa un CRUD de usuarios, incluye validaciones, manejo de errores consistente, documentación Swagger, pruebas unitarias y e2e. La persistencia es en memoria (array) para simplificar la prueba técnica; está preparada para enchufar un ORM más adelante.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologías y librerías
 
-## Description
+- **Node.js** + **TypeScript**
+- **NestJS** (Controllers, Services, Modules)
+- **class-validator / class-transformer** (validaciones)
+- **@nestjs/swagger** (documentación)
+- **Jest** (unit tests) + **Supertest** (e2e tests)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Requisitos
 
-## Project setup
+- Node.js 18+ (recomendado LTS)
+- npm 9+ / 10+
+- Puerto **3000** libre
+
+## Instalación
 
 ```bash
-$ npm install
+# Clonar el repo
+git clone <URL_DEL_REPO>
+cd users-api-crud
+
+# Instalar dependencias
+npm install
 ```
 
-## Compile and run the project
+Dependencias de test e2e (si no las tenés):
+```bash
+npm i -D supertest @types/supertest
+```
+
+Asegurate de tener en `tsconfig.json`:
+```json
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
+```
+
+## Ejecutar en desarrollo
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Run tests
+- API: http://localhost:3000  
+- Swagger: http://localhost:3000/docs
 
+## Estructura del proyecto
+
+```
+.
+├─ src/
+│  ├─ app.module.ts
+│  ├─ main.ts
+│  ├─ common/
+│  │  └─ filters/
+│  │     └─ http-exception.filter.ts
+│  └─ users/
+│     ├─ users.controller.ts
+│     ├─ users.module.ts
+│     ├─ users.service.ts
+│     ├─ dto/
+│     │  ├─ create-profile.dto.ts
+│     │  ├─ create-user.dto.ts
+│     │  ├─ update-profile.dto.ts
+│     │  └─ update-user.dto.ts      
+│     └─ entities/
+│        ├─ profile.entity.ts
+│        └─ user.entity.ts
+├─ test/
+│  ├─ app.e2e-spec.ts
+│  └─ jest-e2e.json
+└─ package.json
+```
+
+## Configuración global de la app
+
+- **Validación**: `ValidationPipe` con `whitelist`, `forbidNonWhitelisted`, `transform`.
+- **Errores**: filtro global `HttpExceptionFilter` que retorna JSON consistente.
+- **Swagger**: configurado en `main.ts` (ruta `/docs`).
+
+## Contrato de datos
+
+**Usuario**
+```ts
+{
+  id: number;
+  nombre: string;
+  correoElectronico: string;  // único (case-insensitive)
+  edad: number;
+  perfil: {
+    id: number;
+    codigo: string;
+    nombrePerfil: string;
+  };
+  createdAt: string; // ISO
+}
+```
+
+## Endpoints
+
+Base: `http://localhost:3000`
+
+- `GET /users` – Lista de usuarios
+- `GET /users/:id` – Usuario por ID
+- `POST /users` – Crea usuario
+- `PATCH /users/:id` – Actualiza parcialmente
+- `DELETE /users/:id` – Elimina usuario
+
+### Ejemplos (curl)
+
+Crear:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl -X POST http://localhost:3000/users   -H "Content-Type: application/json"   -d '{
+    "nombre": "Juan Carlos",
+    "correoElectronico": "carlos@example.com",
+    "edad": 28,
+    "perfil": { "id": 1, "codigo": "ADM", "nombrePerfil": "Administrador" }
+  }'
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+Listar:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl http://localhost:3000/users
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Obtener uno:
+```bash
+curl http://localhost:3000/users/1
+```
 
-## Resources
+Actualizar parcialmente (nota: `perfil` acepta parcial):
+```bash
+curl -X PATCH http://localhost:3000/users/1   -H "Content-Type: application/json"   -d '{
+    "nombre": "Juan Carlos Updated",
+    "perfil": { "nombrePerfil": "Admin Global" }
+  }'
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Eliminar:
+```bash
+curl -X DELETE http://localhost:3000/users/1
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Validaciones
 
-## Support
+- `nombre`: requerido, string no vacío.
+- `correoElectronico`: email válido, **único** (comparación case-insensitive).
+- `edad`: entero ≥ 0.
+- `perfil`: requerido en creación (id, codigo, nombrePerfil).  
+  En actualización **parcial** (`PATCH`) `perfil` admite cualquier subset de sus campos (gracias a `UpdateProfileDto` + `IntersectionType` en `UpdateUserDto`).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Manejo de errores
 
-## Stay in touch
+Formato uniforme del filtro global:
+```json
+{
+  "statusCode": 409,
+  "error": "EmailAlreadyExists",
+  "message": "El correo 'carlos@example.com' ya está en uso.",
+  "field": "correoElectronico",
+  "timestamp": "2025-09-21T13:00:00.000Z",
+  "path": "/users"
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Códigos usados:
+- 400: validaciones / body inválido
+- 404: usuario no encontrado
+- 409: email duplicado
+- 500: error no controlado
 
-## License
+## Documentación (Swagger)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- URL: `http://localhost:3000/docs`
+- DTOs anotados con `@ApiProperty` / `@ApiPropertyOptional`
+- Controllers con `@ApiTags`, `@ApiOperation`, etc.
+
+## Testing
+
+### Unit tests
+
+Ubicación junto al código fuente:
+- `src/users/users.service.spec.ts`
+- `src/users/users.controller.spec.ts`
+
+Correr:
+```bash
+npm run test
+npm run test:watch
+npm run test:cov
+```
+
+### E2E tests
+
+- Carpeta: `test/`
+- Archivo: `app.e2e-spec.ts`
+- Config: `test/jest-e2e.json`
+
+Script:
+```bash
+npm run test:e2e
+```
+
+**Notas importantes e2e**
+- Importación de Supertest:
+  ```ts
+  import request from 'supertest';
+  ```
+  Alternativa sin tocar tsconfig:
+  ```ts
+  const request = require('supertest');
+  ```
+- `jest-e2e.json` no debe contener claves de `package.json` (como `scripts`).
+
+## Scripts útiles
+
+`package.json` mínimo:
+```json
+{
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:e2e": "jest -c ./test/jest-e2e.json"
+  }
+}
+```
+
+## Decisiones de diseño
+
+- **In-memory repository**: facilita la prueba técnica y los tests.  
+  Para producción, reemplazar por ORM (Prisma/TypeORM).
+- **Unicidad de email**: normaliza a minúsculas y compara por valor.
+- **Update parcial de perfil**: se resolvió con `IntersectionType` y `OmitType` para evitar conflictos de tipos con `PartialType(CreateUserDto)`.
+
+

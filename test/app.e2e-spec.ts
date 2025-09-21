@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
+
 const request = require('supertest');
 
 describe('Users E2E', () => {
@@ -14,7 +15,6 @@ describe('Users E2E', () => {
 
     app = moduleRef.createNestApplication();
 
-    // Mismo setup que en main.ts
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,

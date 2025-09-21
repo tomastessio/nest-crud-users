@@ -9,7 +9,9 @@ import { Request, Response } from 'express';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+
   catch(exception: unknown, host: ArgumentsHost) {
+
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
@@ -22,20 +24,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
 
     if (exception instanceof HttpException) {
+    
       status = exception.getStatus();
+    
       const response = exception.getResponse();
-      // response puede ser string o objeto
+    
       if (typeof response === 'string') {
+    
         payload = { statusCode: status, error: response };
+    
       } else {
+    
         payload = { statusCode: status, ...response };
+    
       }
+    
     } else if (exception instanceof Error) {
+    
       payload = {
         statusCode: status,
         error: exception.name,
         message: exception.message,
       };
+    
     }
 
     payload.timestamp = new Date().toISOString();
