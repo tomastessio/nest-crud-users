@@ -9,6 +9,7 @@ describe('UsersController', () => {
 
   const now = new Date();
 
+  // Mock del servicio: sólo me interesan las firmas
   const mockService: jest.Mocked<UsersService> = {
     findAll: jest.fn(),
     findOne: jest.fn(),
@@ -29,6 +30,7 @@ describe('UsersController', () => {
   });
 
   it('GET /users -> findAll', () => {
+    // Devuelvo una lista con un usuario de prueba
     service.findAll.mockReturnValue([
       {
         id: 1,
@@ -39,9 +41,13 @@ describe('UsersController', () => {
         createdAt: now,
       },
     ]);
-    const res = controller.findAll();
+
+    // El controller espera un DTO de query; paso {} para “sin filtro”
+    const res = controller.findAll({} as any);
     expect(res).toHaveLength(1);
     expect(service.findAll).toHaveBeenCalledTimes(1);
+    // Y como no hay q, el servicio debe haber sido llamado con undefined
+    expect(service.findAll).toHaveBeenCalledWith(undefined);
   });
 
   it('GET /users/:id -> findOne', () => {
@@ -53,7 +59,9 @@ describe('UsersController', () => {
       perfil: { id: 2, codigo: 'USR', nombrePerfil: 'Usuario' },
       createdAt: now,
     });
-    const res = controller.findOne(2);
+
+    // El controller recibe id como string y adentro hace +id
+    const res = controller.findOne('2');
     expect(res.id).toBe(2);
     expect(service.findOne).toHaveBeenCalledWith(2);
   });
@@ -64,12 +72,14 @@ describe('UsersController', () => {
       ...dto,
       createdAt: now,
     }));
+
     const res = controller.create({
       nombre: 'New',
       correoElectronico: 'new@example.com',
       edad: 18,
       perfil: { id: 1, codigo: 'ADM', nombrePerfil: 'Administrador' },
     } as any);
+
     expect(res.id).toBe(3);
     expect(service.create).toHaveBeenCalledTimes(1);
   });
@@ -78,6 +88,7 @@ describe('UsersController', () => {
     service.create.mockImplementation(() => {
       throw new ConflictException();
     });
+
     expect(() =>
       controller.create({
         nombre: 'Dup',
@@ -98,14 +109,18 @@ describe('UsersController', () => {
       createdAt: now,
       ...dto,
     }));
-    const res = controller.update(10, { nombre: 'Updated' } as any);
+
+    // Igual que en findOne: el controller recibe string y castea a number
+    const res = controller.update('10', { nombre: 'Updated' } as any);
     expect(res.id).toBe(10);
     expect(service.update).toHaveBeenCalledWith(10, { nombre: 'Updated' });
   });
 
   it('DELETE /users/:id -> remove', () => {
     service.remove.mockReturnValue(undefined);
-    expect(controller.remove(7)).toBeUndefined();
+
+    // Paso string para matchear la firma del controller
+    expect(controller.remove('7')).toBeUndefined();
     expect(service.remove).toHaveBeenCalledWith(7);
   });
 
@@ -113,6 +128,8 @@ describe('UsersController', () => {
     service.findOne.mockImplementation(() => {
       throw new NotFoundException();
     });
-    expect(() => controller.findOne(999)).toThrow(NotFoundException);
+
+    // De nuevo, el controller recibe string
+    expect(() => controller.findOne('999')).toThrow(NotFoundException);
   });
 });

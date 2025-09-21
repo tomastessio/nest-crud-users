@@ -219,6 +219,24 @@ npm run test:e2e
   ```
 - `jest-e2e.json` no debe contener claves de `package.json` (como `scripts`).
 
+## Ejecutar con Docker
+
+> Requisito: Docker 24+
+
+
+### 2 Construir la imagen
+Desde la raíz del proyecto (al lado de `package.json` y `Dockerfile`):
+```bash
+docker build -t users-api:latest .
+```
+
+### 3 Ejecutar el contenedor
+```bash
+docker run --rm -p 3000:3000 --name users-api users-api:latest
+```
+- API: http://localhost:3000
+- Swagger: http://localhost:3000/docs
+
 ## Scripts útiles
 
 `package.json` mínimo:
